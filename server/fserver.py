@@ -1,6 +1,7 @@
 from flask import Flask, request
 import json
 from socket import gethostbyname, gethostname
+from pickle import load
 
 print(f"\n---\nRunning server on IP: {gethostbyname(gethostname())}\n---\n")
 
@@ -10,10 +11,14 @@ class info:
     world = []
 
 # Worldgen Stuff
-world_size = int(input("World Size:"))
-for x in range(world_size):
-    for z in range(world_size):
-        info.world.append([x, 0, z, "stone.png"])
+if input("Load World File? (y/n): ").lower() == "y":
+    with open(input("Path to file (.mins): "), "rb") as input_file:
+        info.world = pickle.load(input_file)
+else:
+    world_size = int(input("World Size: "))
+    for x in range(world_size):
+        for z in range(world_size):
+            info.world.append([x, 0, z, "stone.png"])
 
 app = Flask(__name__)
 

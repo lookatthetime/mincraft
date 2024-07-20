@@ -21,11 +21,7 @@ from PIL import Image, ImageTk
 # from server.client import send_get_request, send_post_request
 
 
-VERSION = "ver 2.0.1"
-
-
-class n:
-    pass
+VERSION = "ver 2.0.2"
 
 
 class preblocks:
@@ -50,10 +46,11 @@ class l:
 # Multiplayer
 class m:
     is_multiplayer = False
+    is_public_server = False
 
 root = tk.Tk()
 root.title("mincraft launcher " + VERSION)
-root.geometry("400x300")
+root.geometry("400x330")
 root.resizable(False, False)
 root.protocol("WM_DELETE_WINDOW", lambda: exit(0))
 
@@ -102,6 +99,11 @@ def join_server():
     m.is_multiplayer = True
     destroy_win()
 
+def join_public_server():
+    m.is_multiplayer = True
+    m.is_public_server = True
+    destroy_win()
+
 
 
 # rootframe = tk.Frame(root)
@@ -117,7 +119,8 @@ tk.Button(root, text="turn off shaders", command=deactivate_shaders).pack()
 
 # tk.Button(root, text="load custom texture", command=cust_tex).pack()
 tk.Label(root, text="Online:").pack()
-tk.Button(root, text="join server", command=join_server).pack()
+tk.Button(root, text="join public server", command=join_public_server).pack()
+tk.Button(root, text="join LAN", command=join_server).pack()
 tk.Label(root, text="Start World:").pack()
 tk.Button(root, text="start game", command=destroy_win).pack()
 tk.Button(root, text="start flat world game", command=flat_load).pack()
@@ -374,13 +377,13 @@ if not m.is_multiplayer:
 else:
     from server import fclient
 
-    throwaway = tk.Tk()
-    throwaway.withdraw()
-    if askyesno("mincraft", "Join Public Server?"):
+    if m.is_public_server:
         client = fclient.FlaskClient("54.235.27.4", "9000")
     else:
+        throwaway = tk.Tk()
+        throwaway.withdraw()
         client = fclient.FlaskClient(askstring("mincraft", "Server IP:"), askstring("mincraft", "Server Port:"))
-    throwaway.destroy()
+        throwaway.destroy()
 
     class b:
         blocks = deepcopy(preblocks.blocks)
@@ -417,6 +420,12 @@ else:
             b.curblock += 1
             if b.curblock >= len(b.blocks):
                 b.curblock = len(b.blocks) - 1
+        if key == 'enter':
+            root = tk.Tk()
+            root.withdraw()
+            with open(asksaveasfilename(defaultextension=".mins"), "wb") as output_file:
+                pickle.dump(client.get_world(), output_file)
+            root.destroy()
 
     def update():
         b.blocktext.text = b.blocks[b.curblock][0]
