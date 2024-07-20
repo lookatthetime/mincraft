@@ -390,6 +390,9 @@ else:
         world = []
         voxworld = []
     
+    class s:
+        updateiter = 0
+    
     def input(key):
         if key == 'right mouse down':
             hit_info = raycast(camera.world_position, camera.forward, distance=5)
@@ -418,14 +421,17 @@ else:
     def update():
         b.blocktext.text = b.blocks[b.curblock][0]
 
-        cworld = client.get_world()
-        if cworld != b.world:
-            b.world = cworld
-            for i in b.voxworld:
-                destroy(i)
-            b.voxworld = []
-            for i in b.world:
-                b.voxworld.append(Voxel(position=(int(i[0]), int(i[1]), int(i[2])), tex=i[3]))
+        s.updateiter += 1
+        if s.updateiter == 4:
+            cworld = client.get_world()
+            if cworld != b.world:
+                b.world = cworld
+                for i in b.voxworld:
+                    destroy(i)
+                b.voxworld = []
+                for i in b.world:
+                    b.voxworld.append(Voxel(position=(int(i[0]), int(i[1]), int(i[2])), tex=i[3]))
+            s.updateiter = 0
         
         if player.position[1] < -8:
             player.position = Vec3(0, 0, 0)

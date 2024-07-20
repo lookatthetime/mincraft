@@ -5,12 +5,13 @@ class FlaskClient:
     def __init__(self, ip, port) -> None:
         self.ip = ip
         self.port = port
+        self.s = requests.Session()
     
     def get_world(self):
-        return json.loads(requests.get(f"http://{self.ip}:{self.port}/world").text)
+        return json.loads(self.s.get(f"http://{self.ip}:{self.port}/world").text)
     
     def send_block(self, position, tex):
-        requests.post(f"http://{self.ip}:{self.port}/placed", {
+        self.s.post(f"http://{self.ip}:{self.port}/placed", {
             "x": position[0],
             "y": position[1],
             "z": position[2],
@@ -18,7 +19,7 @@ class FlaskClient:
         })
     
     def send_destroy(self, position, tex):
-        requests.post(f"http://{self.ip}:{self.port}/destroyed", {
+        self.s.post(f"http://{self.ip}:{self.port}/destroyed", {
             "x": position[0],
             "y": position[1],
             "z": position[2],
