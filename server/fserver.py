@@ -13,7 +13,7 @@ class info:
 # Worldgen Stuff
 if input("Load World File? (y/n): ").lower() == "y":
     with open(input("Path to file (.mins): "), "rb") as input_file:
-        info.world = pickle.load(input_file)
+        info.world = load(input_file)
 else:
     world_size = int(input("World Size: "))
     for x in range(world_size):
