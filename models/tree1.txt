@@ -1,0 +1,7 @@
+0,0,0,spruce_log.png
+0,1,0,spruce_log.png
+0,2,0,leaves.png
+1,1,0,leaves.png
+0,1,1,leaves.png
+-1,1,0,leaves.png
+0,1,-1,leaves.png
