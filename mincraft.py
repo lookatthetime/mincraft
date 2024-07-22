@@ -391,6 +391,7 @@ else:
         blocktext = Text(font="assets/font.ttf", position=Vec2(0.01, 0.01))
         
         world = []
+        world_version = -1
         voxworld = []
     
     class s:
@@ -431,10 +432,11 @@ else:
         b.blocktext.text = b.blocks[b.curblock][0]
 
         s.updateiter += 1
-        if s.updateiter == 4:
-            cworld = client.get_world()
-            if cworld != b.world:
-                b.world = cworld
+        if s.updateiter == 2:
+            cworld_version = client.get_world_version()
+            if cworld_version != b.world_version:
+                b.world = client.get_world()
+                b.world_version = cworld_version
                 for i in b.voxworld:
                     destroy(i)
                 b.voxworld = []

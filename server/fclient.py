@@ -10,6 +10,11 @@ class FlaskClient:
     def get_world(self):
         return json.loads(self.s.get(f"http://{self.ip}:{self.port}/world").text)
     
+
+    def get_world_version(self):
+        return json.loads(self.s.get(f"http://{self.ip}:{self.port}/world_version").text)
+    
+
     def send_block(self, position, tex):
         self.s.post(f"http://{self.ip}:{self.port}/placed", {
             "x": position[0],

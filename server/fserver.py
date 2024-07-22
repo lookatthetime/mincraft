@@ -9,6 +9,7 @@ print(f"\n---\nRunning server on IP: {gethostbyname(gethostname())}\n---\n")
 
 class info:
     world = []
+    world_version = 0
 
 # Worldgen Stuff
 if input("Load World File? (y/n): ").lower() == "y":
@@ -26,6 +27,12 @@ app = Flask(__name__)
 def get_world():
     return json.dumps(info.world)
 
+
+@app.route("/world_version", methods=['GET'])
+def get_world_version():
+    return json.dumps(info.world_version)
+
+
 @app.route("/placed", methods=['POST'])
 def block_placed():
     params = {
@@ -37,6 +44,7 @@ def block_placed():
     info.world.append(
         [int(float(params["x"])), int(float(params["y"])), int(float(params["z"])), params["tex"]]
     )
+    info.world_version += 1
     return ""
 
 @app.route("/destroyed", methods=['POST'])
@@ -50,6 +58,7 @@ def block_destroyed():
     info.world.remove(
         [int(float(params["x"])), int(float(params["y"])), int(float(params["z"])), params["tex"]]
     )
+    info.world_version += 1
     return ""
 
 if __name__ == '__main__':
