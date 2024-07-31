@@ -1,7 +1,8 @@
 import requests
 import json
+from server.client import GameClient
 
-class FlaskClient:
+class FlaskClient(GameClient):
     def __init__(self, ip, port) -> None:
         self.ip = ip
         self.port = port

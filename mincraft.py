@@ -19,6 +19,9 @@ from PIL import Image, ImageTk
 # from modules.server import Server
 # from modules.client import Client, get_ip
 # from server.client import send_get_request, send_post_request
+from server.client import GameClient
+from server.fclient import FlaskClient
+from server.rclient import RedisClient
 
 
 VERSION = "ver 2.0.2"
@@ -375,15 +378,18 @@ if not m.is_multiplayer:
 
 
 else:
-    from server import fclient
-
     if m.is_public_server:
-        client = fclient.FlaskClient("54.235.27.4", "9000")
+        client: GameClient = FlaskClient("54.235.27.4", "9000")
     else:
         throwaway = tk.Tk()
         throwaway.withdraw()
-        client = fclient.FlaskClient(askstring("mincraft", "Server IP:"), askstring("mincraft", "Server Port:"))
+        client: GameClient = RedisClient('127.0.0.1', 6379)
         throwaway.destroy()
+        
+        # Worldgen Stuff
+        for x in range(l.ws):
+            for z in range(l.ws):
+                client.send_block([x, 0, z], "stone.png")
 
     class b:
         blocks = deepcopy(preblocks.blocks)
