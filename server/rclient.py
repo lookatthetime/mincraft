@@ -6,8 +6,14 @@ WORLD_KEY = 'world'
 WORLD_VERSION_KEY = 'world_version'
 
 class RedisClient:
-    def __init__(self, host, port, username=None, pw=None) -> None:
+    def __init__(self, host, port, world_size: int, username=None, pw=None) -> None:
         self.redis = redis.Redis(host=host, port=port, db=0, decode_responses=True, username=username, password=pw)
+                
+        # Worldgen Stuff
+        if not self.redis.exists(WORLD_KEY):
+            for x in range(world_size):
+                for z in range(world_size):
+                    self.send_block([x, 0, z], "stone.png")
 
 
     def get_world(self) -> Iterable[list[any]]:

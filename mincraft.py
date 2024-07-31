@@ -383,13 +383,8 @@ else:
     else:
         throwaway = tk.Tk()
         throwaway.withdraw()
-        client: GameClient = RedisClient('127.0.0.1', 6379)
+        client: GameClient = RedisClient('127.0.0.1', 8380, l.ws)
         throwaway.destroy()
-        
-        # Worldgen Stuff
-        for x in range(l.ws):
-            for z in range(l.ws):
-                client.send_block([x, 0, z], "stone.png")
 
     class b:
         blocks = deepcopy(preblocks.blocks)
