@@ -8,6 +8,5 @@ Use this command on requirements.txt ot install dependencies: pip install -r req
 
 Change log:
 
-- Save server contents as a world file
-- Load world file upon server creation
-- Changed Join Server UI
+- Added Redis server support
+- Revamped UI for Redis game joining

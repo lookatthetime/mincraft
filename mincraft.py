@@ -24,11 +24,11 @@ from server.fclient import FlaskClient
 from server.rclient import RedisClient
 
 
-VERSION = "ver 2.0.2"
+VERSION = "ver 2.1.0"
 
 
 class preblocks:
-    blocks = [["Cobble", "cobble.png"], ["Gravity Block", "gravity_block.png"], ["Dirt", "dirt.png"], ["Grass", "grass.png"],
+    blocks = [["Cobble", "cobble.png"], ["Gravity Block", "gravity_block.png"], ["Dirt", "dirt.png"], ["Grass", "mgrass.png"],
               ["Planks", "planks.png"], ["Log", "log.png"], ["Leaves", "leaves.png"], ["Flowers", "flowers.png"],
               ["Glass", "glass.png"], ["Bricks", "bricks.png"], ["Stone Bricks", "deepslate_bricks.png"],
               ["Ice", "ice.png"], ["Moss", "moss.png"]]
@@ -230,7 +230,7 @@ if not m.is_multiplayer:
                 for x in range(l.ws):
                     y = noise([x * .02,z * .02])
                     y = math.floor(y * 7.5)
-                    w.world.append([x, y + 6, z, "grass.png"])
+                    w.world.append([x, y + 6, z, "mgrass.png"])
             
             for i in w.world:
                 blocks.append(Voxel(position=(i[0], i[1], i[2]), tex=i[3]))
@@ -383,7 +383,12 @@ else:
     else:
         throwaway = tk.Tk()
         throwaway.withdraw()
-        client: GameClient = RedisClient('127.0.0.1', 8380, l.ws)
+        if askyesno("mincraft online", "Join Redis server?"):
+            client: GameClient = RedisClient(askstring("mincraft online", "IP:", initialvalue="127.0.0.1"), 
+                                             int(askstring("mincraft online", "Port:", initialvalue="6379")), l.ws)
+        else:
+            client: GameClient = FlaskClient(askstring("mincraft online", "IP:", initialvalue="127.0.0.1"),
+                                             askstring("mincraft online", "Port:", initialvalue="9000"))
         throwaway.destroy()
 
     class b:

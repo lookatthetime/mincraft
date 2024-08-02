@@ -1,4 +1,6 @@
 .venv-mincraft
+dump.rdb
+.DS_STORE
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
