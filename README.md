@@ -4,10 +4,21 @@
 
 **This game is made by Look at the Time Studios with assets (unlicensed) from Mojang**
 
-Use this command on requirements.txt to install dependencies: pip install -r requirements.txt (venv recomended)
-
 Change log:
 
 - Added native macOS build system (run build.sh)
+- Bug fixes
 
-For Devs: Don't forget to put assets, models, and modules in the Contents/Resources folder of the build
+## For Devs:
+
+### Create a venv with
+- `python3.11 -m venv venv`
+- `source venv/bin/activate`
+
+and install venv dependencies with:
+
+- `pip install -r requirements.txt`
+
+### To build:
+- **_Make sure you have a venv!!!_**
+- run `build.sh`

@@ -40,6 +40,7 @@ class w:
     s_texs = ["leaves.png", "log.png", "flowers.png"]
     grav_blocks = []
     shaders = True
+    old_win = False
 
 # Launcher
 class l:
@@ -53,7 +54,7 @@ class m:
 
 root = tk.Tk()
 root.title("mincraft launcher " + VERSION)
-root.geometry("400x330")
+root.geometry("400x350")
 root.resizable(False, False)
 root.protocol("WM_DELETE_WINDOW", lambda: exit(0))
 
@@ -97,6 +98,9 @@ def cust_tex():
 def deactivate_shaders():
     w.shaders = False
 
+def run_old():
+    w.old_win = True
+
 
 def join_server():
     m.is_multiplayer = True
@@ -119,6 +123,7 @@ world_size = tk.Entry(root)
 world_size.pack()
 world_size.insert(1, "10")
 tk.Button(root, text="turn off shaders", command=deactivate_shaders).pack()
+tk.Button(root, text="activate old window type", command=run_old).pack()
 
 # tk.Button(root, text="load custom texture", command=cust_tex).pack()
 tk.Label(root, text="Online:").pack()
@@ -133,7 +138,7 @@ root.mainloop()
     
 
 # Game
-app = Ursina(development_mode=False, borderless=False)
+app = Ursina(development_mode=w.old_win, borderless=w.old_win)
 
 if w.shaders:
     lit_with_shadows_shader.default_input['shadow_color'] = color.hsv(0, 0, 0, 0.2)
@@ -364,7 +369,7 @@ if not m.is_multiplayer:
                 #     player.gravity = 1
 
 
-    player = FirstPersonController()
+    player = FirstPersonController(position=(0, 15, 0))
 
     if w.shaders:
         light = DirectionalLight(shadows=True)
