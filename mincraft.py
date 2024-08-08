@@ -24,7 +24,7 @@ from server.fclient import FlaskClient
 from server.rclient import RedisClient
 
 
-VERSION = "ver 2.1.0"
+VERSION = "ver 2.1.1"
 
 
 class preblocks:
@@ -133,7 +133,7 @@ root.mainloop()
     
 
 # Game
-app = Ursina()
+app = Ursina(development_mode=False, borderless=False)
 
 if w.shaders:
     lit_with_shadows_shader.default_input['shadow_color'] = color.hsv(0, 0, 0, 0.2)
