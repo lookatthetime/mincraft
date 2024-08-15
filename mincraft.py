@@ -385,7 +385,7 @@ if not m.is_multiplayer:
 
 else:
     if m.is_public_server:
-        client: GameClient = SqliteFlaskClient("127.0.0.1", "8080")
+        client: GameClient = SqliteFlaskClient("192.168.68.124", "8080")
     else:
         throwaway = tk.Tk()
         throwaway.withdraw()
