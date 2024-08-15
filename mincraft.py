@@ -402,8 +402,7 @@ else:
         curblock = 0
         blocktext = Text(font="assets/font.ttf", position=Vec2(0.01, 0.01))
         
-        world = []
-        world_version = -1
+        last_edit_id = 0
         voxworld = {}
     
     class s:
@@ -445,22 +444,17 @@ else:
 
         s.updateiter += 1
         if s.updateiter == 2:
-            cworld_version = client.get_world_version()
-            if cworld_version != b.world_version:
-                b.world = client.get_world_edits()
-                b.world_version = cworld_version
-                for i in b.voxworld.values():
-                    destroy(i)
-                b.voxworld = {}
-                for i in b.world:
-                    pos = (int(i[0]), int(i[1]), int(i[2]))
-                    if i[3] is None and pos in b.voxworld:
+            edits = client.get_world_edits(b.last_edit_id + 1)
+            for edit in edits:
+                pos = (int(edit[0]), int(edit[1]), int(edit[2]))
+                if edit[3] is None and pos in b.voxworld:
+                    destroy(b.voxworld[pos])
+                    del b.voxworld[pos]
+                else:
+                    if pos in b.voxworld:
                         destroy(b.voxworld[pos])
-                        del b.voxworld[pos]
-                    else:
-                        if pos in b.voxworld:
-                            destroy(b.voxworld[pos])
-                        b.voxworld[pos] = Voxel(position=(int(i[0]), int(i[1]), int(i[2])), tex=i[3])
+                    b.voxworld[pos] = Voxel(position=pos, tex=edit[3])
+                b.last_edit_id = int(edit[4])
             s.updateiter = 0
         
         if player.position[1] < -8:
