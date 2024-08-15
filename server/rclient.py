@@ -1,11 +1,12 @@
 from collections.abc import Iterable
 
 import redis
+from server.client import GameClient
 
 WORLD_KEY = 'world'
 WORLD_VERSION_KEY = 'world_version'
 
-class RedisClient:
+class RedisClient(GameClient):
     def __init__(self, host, port, world_size: int, username=None, pw=None) -> None:
         self.redis = redis.Redis(host=host, port=port, db=0, decode_responses=True, username=username, password=pw)
                 
@@ -25,6 +26,10 @@ class RedisClient:
 
     def get_world_version(self) -> int:
         return int(self.redis.get(WORLD_VERSION_KEY) or 0)
+
+
+    def get_world_edits(self) -> list[list[any]]:
+        raise NotImplementedError
 
 
     def send_block(self, position, tex) -> None:

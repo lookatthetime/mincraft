@@ -22,6 +22,7 @@ from PIL import Image, ImageTk
 from server.client import GameClient
 from server.fclient import FlaskClient
 from server.rclient import RedisClient
+from server.sqlite_fclient import SqliteFlaskClient
 
 
 VERSION = "ver 2.1.1"
@@ -384,7 +385,7 @@ if not m.is_multiplayer:
 
 else:
     if m.is_public_server:
-        client: GameClient = FlaskClient("54.235.27.4", "9000")
+        client: GameClient = SqliteFlaskClient("127.0.0.1", "8080")
     else:
         throwaway = tk.Tk()
         throwaway.withdraw()
@@ -403,7 +404,7 @@ else:
         
         world = []
         world_version = -1
-        voxworld = []
+        voxworld = {}
     
     class s:
         updateiter = 0
@@ -446,13 +447,20 @@ else:
         if s.updateiter == 2:
             cworld_version = client.get_world_version()
             if cworld_version != b.world_version:
-                b.world = client.get_world()
+                b.world = client.get_world_edits()
                 b.world_version = cworld_version
-                for i in b.voxworld:
+                for i in b.voxworld.values():
                     destroy(i)
-                b.voxworld = []
+                b.voxworld = {}
                 for i in b.world:
-                    b.voxworld.append(Voxel(position=(int(i[0]), int(i[1]), int(i[2])), tex=i[3]))
+                    pos = (int(i[0]), int(i[1]), int(i[2]))
+                    if i[3] is None and pos in b.voxworld:
+                        destroy(b.voxworld[pos])
+                        del b.voxworld[pos]
+                    else:
+                        if pos in b.voxworld:
+                            destroy(b.voxworld[pos])
+                        b.voxworld[pos] = Voxel(position=(int(i[0]), int(i[1]), int(i[2])), tex=i[3])
             s.updateiter = 0
         
         if player.position[1] < -8:
