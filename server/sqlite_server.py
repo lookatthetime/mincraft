@@ -66,5 +66,14 @@ def block_destroyed():
         con.cursor().execute(f"INSERT INTO world_edit (x, y, z, texture) VALUES ({x}, {y}, {z}, NULL)")
         return ""
 
+@app.route("/player", methods=['PUT'])
+def player_received():
+    with sqlite3.connect("/tmp/mincraft.db") as con:
+        x = request.values.get('x')
+        y = request.values.get('y')
+        z = request.values.get('z')
+        con.cursor().execute(f"INSERT INTO world_edit (x, y, z, texture) VALUES ({x}, {y}, {z}, NULL)")
+        return ""
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=input("Run on port: "))
