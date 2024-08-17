@@ -3,7 +3,7 @@ from socket import gethostbyname, gethostname
 import sqlite3
 from os.path import exists
 
-from flask import Flask, request
+from flask import Flask, request, abort
 
 print(f"\n---\nRunning server on IP: {gethostbyname(gethostname())}\n---\n")
 
@@ -19,6 +19,8 @@ if not exists("/tmp/mincraft.db"):
         for x in range(10):
             for z in range(10):
                 cur.execute(f"INSERT INTO world_edit (x, y, z, texture) VALUES ({x}, 0, {z}, 'stone.png')")
+
+        cur.execute("CREATE TABLE IF NOT EXISTS player(x INTEGER, y INTEGER, z INTEGER, texture TEXT, name TEXT UNIQUE, session_id TEXT)")
 else:
     print("Using existing world.")
 
@@ -66,14 +68,36 @@ def block_destroyed():
         con.cursor().execute(f"INSERT INTO world_edit (x, y, z, texture) VALUES ({x}, {y}, {z}, NULL)")
         return ""
 
-@app.route("/player", methods=['PUT'])
-def player_received():
+
+@app.route("/player/<name>", methods=['PUT'])
+def put_player(name):
     with sqlite3.connect("/tmp/mincraft.db") as con:
         x = request.values.get('x')
         y = request.values.get('y')
         z = request.values.get('z')
-        con.cursor().execute(f"INSERT INTO world_edit (x, y, z, texture) VALUES ({x}, {y}, {z}, NULL)")
-        return ""
+        tex = request.values.get('tex')
+        session_id = request.values.get('session_id')
+        player = con.cursor().execute(f"SELECT session_id FROM player WHERE name = '{name}'").fetchone()
+        if player is not None and (session_id is not None and player[0] is not None and player[0] != session_id):
+            abort(401, description="Player in use in another session.")
+        elif player is not None:
+            if session_id is None:
+                con.cursor().execute(f"UPDATE player SET x = {x}, y = {y}, z = {z}, texture = '{tex}', session_id = NULL WHERE name = '{name}'")
+            else:
+                con.cursor().execute(f"UPDATE player SET x = {x}, y = {y}, z = {z}, texture = '{tex}', session_id = '{session_id}' WHERE name = '{name}'")
+            return ""
+        else:
+            con.cursor().execute(f"INSERT INTO player (x, y, z, texture, session_id, name) VALUES ({x}, {y}, {z}, '{tex}', '{session_id}', '{name}')")
+            return ""
+
+
+@app.route("/player", methods=['GET'])
+def get_players():
+    with sqlite3.connect("/tmp/mincraft.db") as con:
+        players = con.cursor().execute(f"SELECT x, y, z, texture, session_id, name FROM player ORDER BY rowid ASC")
+        return json.dumps(players.fetchall())
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=input("Run on port: "))

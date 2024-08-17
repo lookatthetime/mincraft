@@ -1,13 +1,15 @@
 import requests
 import json
-from server.client import GameClient
+from client import GameClient
 
 class SqliteFlaskClient(GameClient):
-    def __init__(self, ip, port, name) -> None:
+    def __init__(self, ip, port, name, session_id, player_tex) -> None:
         self.ip = ip
         self.port = port
         self.s = requests.Session()
         self.name = name
+        self.session = session_id
+        self.tex = player_tex
 
 
     def get_world(self):
@@ -24,7 +26,7 @@ class SqliteFlaskClient(GameClient):
     
 
     def get_players(self):
-        return json.loads(self.s.get(f"http://{self.ip}:{self.port}/players").text)
+        return json.loads(self.s.get(f"http://{self.ip}:{self.port}/player").text)
 
 
     def send_block(self, position, tex):
@@ -49,24 +51,16 @@ class SqliteFlaskClient(GameClient):
     # GET /block/x,y,z
 
 
-    def establish_player(self, position, tex):
-        self.s.post(f"http://{self.ip}:{self.port}/player", {
-            "x": position[0],
-            "y": position[1],
-            "z": position[2],
-            "tex": tex,
-            "name": self.name
-        })
-
-
     def send_player(self, position, tex):
-        self.s.put(f"http://{self.ip}:{self.port}/player", {
+        resp = self.s.put(f"http://{self.ip}:{self.port}/player/{self.name}", {
             "x": position[0],
             "y": position[1],
             "z": position[2],
-            "tex": tex,
-            "name": self.name
+            "tex": self.tex,
+            "session_id": self.session
         })
+        if resp.status_code == 401:
+            raise RuntimeError("Player Already Claimed")
 
     # client:
     # make session id (could be uuid)
@@ -101,8 +95,7 @@ if __name__ == "__main__":
 
     #     print(world)
 
-    client = FlaskClient("127.0.0.1", "9000")
+    client = SqliteFlaskClient("127.0.0.1", "8080", "blah", None, "notattex")
 
-    while True:
-        client.get_world()
-        client.send_block(0, 0, 0, "grass.png")
+    client.send_player((0, 135, 2394), "notattex")
+    print(client.get_players())
