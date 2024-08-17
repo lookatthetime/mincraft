@@ -1,6 +1,6 @@
 import requests
 import json
-from client import GameClient
+from server.client import GameClient
 
 class SqliteFlaskClient(GameClient):
     def __init__(self, ip, port, name, session_id, player_tex) -> None:
