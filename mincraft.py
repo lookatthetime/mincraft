@@ -415,10 +415,12 @@ else:
     
     class s:
         updateiter = 0
+        past_position = (0, 0, 0)
 
     class Enemy(Entity):
-        def __init__(self, name: str, hp, position, **kwargs):
-            super().__init__(parent=shootables_parent, model='cube', scale_y=2, origin_y=-.5, color=color.blue, collider='box', position=position, **kwargs)
+        def __init__(self, name: str, hp, position, texture, **kwargs):
+            super().__init__(model='cube', scale_y=2, origin_y=-.5, color=color.blue, # parent=shootables_parent, 
+                             collider='box', position=position, texture=texture, **kwargs)
             self.health_bar = Entity(parent=self, y=1.2, model='cube', color=color.red, world_scale=(1.5,.1,.1))
             self.name_text = Text(name, parent=self, y=1.5, color=color.green, world_scale=20)
             self.max_hp = 100
@@ -442,6 +444,8 @@ else:
                 return
 
             self.health_bar.world_scale_x = self.hp / self.max_hp * 1.5
+    
+    enemies = {}
     
     def input(key):
         if key == 'right mouse down':
@@ -478,7 +482,7 @@ else:
         b.blocktext.text = b.blocks[b.curblock][0]
 
         s.updateiter += 1
-        if s.updateiter == 2:
+        if s.updateiter == 4:
             edits = client.get_world_edits(b.last_edit_id + 1)
             for edit in edits:
                 pos = (int(edit[0]), int(edit[1]), int(edit[2]))
@@ -491,11 +495,21 @@ else:
                     b.voxworld[pos] = Voxel(position=pos, tex=edit[3])
                 b.last_edit_id = int(edit[4])
             s.updateiter = 0
+
+            for i in client.get_players():
+                if i[5] != client.name:
+                    if i[5] in enemies:
+                        destroy(enemies[i[5]])
+
+                    enemies[i[5]] = Enemy(i[5], 100, (i[0], i[1], i[2]), i[3])
         
         if player.position[1] < -8:
             player.position = Vec3(0, 0, 0)
         
-        client.send_player(player.position)
+        if s.past_position != player.position:
+            client.send_player(player.position)
+        
+        s.past_position = player.position
 
     player = FirstPersonController()
 

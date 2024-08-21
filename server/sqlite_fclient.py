@@ -26,6 +26,11 @@ class SqliteFlaskClient(GameClient):
     
 
     def get_players(self):
+        # print(f"""
+        
+        # {self.s.get(f"http://{self.ip}:{self.port}/player").text}
+
+        # """)
         return json.loads(self.s.get(f"http://{self.ip}:{self.port}/player").text)
     
 
@@ -35,6 +40,11 @@ class SqliteFlaskClient(GameClient):
             self.send_player((0, 0, 0))
             return self.get_player()
         else:
+            print(f"""
+        
+        {self.s.get(f"http://{self.ip}:{self.port}/player/{self.name}").text}
+
+        """)
             return json.loads(resp.text)
 
 
