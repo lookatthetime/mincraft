@@ -27,6 +27,15 @@ class SqliteFlaskClient(GameClient):
 
     def get_players(self):
         return json.loads(self.s.get(f"http://{self.ip}:{self.port}/player").text)
+    
+
+    def get_player(self):
+        resp = self.s.get(f"http://{self.ip}:{self.port}/player/{self.name}")
+        if resp.status_code == 404: # TODO: Race condition
+            self.send_player((0, 0, 0))
+            return self.get_player()
+        else:
+            return json.loads(resp.text)
 
 
     def send_block(self, position, tex):
@@ -51,13 +60,24 @@ class SqliteFlaskClient(GameClient):
     # GET /block/x,y,z
 
 
-    def send_player(self, position, tex):
+    def send_player(self, position):
         resp = self.s.put(f"http://{self.ip}:{self.port}/player/{self.name}", {
             "x": position[0],
             "y": position[1],
             "z": position[2],
             "tex": self.tex,
             "session_id": self.session
+        })
+        if resp.status_code == 401:
+            raise RuntimeError("Player Already Claimed")
+    
+    def end_player(self, position):
+        resp = self.s.put(f"http://{self.ip}:{self.port}/player/{self.name}", {
+            "x": position[0],
+            "y": position[1],
+            "z": position[2],
+            "tex": self.tex,
+            "session_id": None
         })
         if resp.status_code == 401:
             raise RuntimeError("Player Already Claimed")

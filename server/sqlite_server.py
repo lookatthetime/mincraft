@@ -5,7 +5,7 @@ from os.path import exists
 
 from flask import Flask, request, abort
 
-print(f"\n---\nRunning server on IP: {gethostbyname(gethostname())}\n---\n")
+# print(f"\n---\nRunning server on IP: {gethostbyname(gethostname())}\n---\n")
 
 # if needed: run with 'python3 -m flask --app server/sqlite_server.py run --host=0.0.0.0 --port=PUT_PORT_HERE'
 
@@ -97,6 +97,15 @@ def get_players():
         players = con.cursor().execute(f"SELECT x, y, z, texture, session_id, name FROM player ORDER BY rowid ASC")
         return json.dumps(players.fetchall())
 
+
+@app.route("/player/<name>", methods=['GET'])
+def get_player(name):
+    with sqlite3.connect("/tmp/mincraft.db") as con:
+        player = con.cursor().execute(f"SELECT x, y, z, texture, session_id, name FROM player WHERE name = '{name}'").fetchone()
+        if player:
+            return json.dumps(player)
+        else:
+            abort(404, description="Player does not exist.")
 
 
 if __name__ == '__main__':

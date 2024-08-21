@@ -5,7 +5,7 @@ from ursina.shaders.lit_with_shadows_shader import lit_with_shadows_shader
 import tkinter as tk
 from tkinter.filedialog import asksaveasfilename, askopenfilename
 from tkinter.simpledialog import askstring
-from tkinter.messagebox import askyesno
+from tkinter.messagebox import askyesno, showerror
 
 from sys import exit
 from random import randint
@@ -15,13 +15,14 @@ from os import listdir
 from copy import deepcopy
 import shutil
 from PIL import Image, ImageTk
+import uuid
 
 # from modules.server import Server
 # from modules.client import Client, get_ip
 # from server.client import send_get_request, send_post_request
+# from server.fclient import FlaskClient
+# from server.rclient import RedisClient
 from server.client import GameClient
-from server.fclient import FlaskClient
-from server.rclient import RedisClient
 from server.sqlite_fclient import SqliteFlaskClient
 
 
@@ -384,18 +385,25 @@ if not m.is_multiplayer:
 
 
 else:
+    throwaway = tk.Tk()
+    throwaway.withdraw()
+    client: GameClient
     if m.is_public_server:
-        client: GameClient = SqliteFlaskClient("192.168.68.124", "8080")
+        client = SqliteFlaskClient("18.220.151.198", "8574", 
+                                askstring("mincraft online", "Name:"),  uuid.uuid4(), "brick") # 192.168.68.124
+        try:
+            client.get_player()
+        except RuntimeError:
+            showerror("mincraft online", "Player Name Already Exists")
     else:
-        throwaway = tk.Tk()
-        throwaway.withdraw()
-        if askyesno("mincraft online", "Join Redis server?"):
-            client: GameClient = RedisClient(askstring("mincraft online", "IP:", initialvalue="127.0.0.1"), 
-                                             int(askstring("mincraft online", "Port:", initialvalue="6379")), l.ws)
-        else:
-            client: GameClient = FlaskClient(askstring("mincraft online", "IP:", initialvalue="127.0.0.1"),
-                                             askstring("mincraft online", "Port:", initialvalue="9000"))
-        throwaway.destroy()
+        pass
+        # if askyesno("mincraft online", "Join Redis server?"):
+        #     client: GameClient = RedisClient(askstring("mincraft online", "IP:", initialvalue="127.0.0.1"), 
+        #                                      int(askstring("mincraft online", "Port:", initialvalue="6379")), l.ws)
+        # else:
+        #     client: GameClient = FlaskClient(askstring("mincraft online", "IP:", initialvalue="127.0.0.1"),
+        #                                      askstring("mincraft online", "Port:", initialvalue="9000"))
+    throwaway.destroy()
 
     class b:
         blocks = deepcopy(preblocks.blocks)
@@ -407,6 +415,33 @@ else:
     
     class s:
         updateiter = 0
+
+    class Enemy(Entity):
+        def __init__(self, name: str, hp, position, **kwargs):
+            super().__init__(parent=shootables_parent, model='cube', scale_y=2, origin_y=-.5, color=color.blue, collider='box', position=position, **kwargs)
+            self.health_bar = Entity(parent=self, y=1.2, model='cube', color=color.red, world_scale=(1.5,.1,.1))
+            self.name_text = Text(name, parent=self, y=1.5, color=color.green, world_scale=20)
+            self.max_hp = 100
+            self.hp = hp
+            self.name = name
+        
+        def update(self):
+            self.health_bar.look_at_2d(player.position, 'y')
+            self.name_text.look_at_2d(player.position, 'y')
+            self.name_text.rotation_y += 180
+        
+        @property
+        def hp(self):
+            return self._hp
+
+        @hp.setter
+        def hp(self, value):
+            self._hp = value
+            if value <= 0:
+                destroy(self)
+                return
+
+            self.health_bar.world_scale_x = self.hp / self.max_hp * 1.5
     
     def input(key):
         if key == 'right mouse down':
@@ -459,8 +494,16 @@ else:
         
         if player.position[1] < -8:
             player.position = Vec3(0, 0, 0)
+        
+        client.send_player(player.position)
 
     player = FirstPersonController()
+
+    def end_client():
+        client.end_player(player.position)
+        app.quit()
+
+    window.exit_button.on_click = end_client
 
     if w.shaders:
         light = DirectionalLight(shadows=True)
