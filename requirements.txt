@@ -13,8 +13,6 @@ panda3d-gltf==1.2.0
 panda3d-simplepbr==0.12.0
 perlin-noise==1.12
 pillow==10.4.0
-pyobjc-core==10.3.1
-pyobjc-framework-Cocoa==10.3.1
 pyperclip==1.9.0
 redis==5.0.7
 requests==2.32.3
